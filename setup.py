@@ -3,8 +3,6 @@
 
 __author__ = 'mnowotka'
 
-import sys
-
 try:
     from setuptools import setup
 except ImportError:
@@ -12,17 +10,14 @@ except ImportError:
     use_setuptools()
     from setuptools import setup
 
-if sys.version_info < (2, 7, 3) or sys.version_info >= (2, 7, 7):
-    raise Exception('ChEMBL software stack requires python 2.7.3 - 2.7.7')
-
 setup(
     name='chembl_extras',
-    version='0.5.2',
+    version='0.5.3',
     author='Michal Nowotka',
     author_email='mnowotka@ebi.ac.uk',
     description='Python package providing extra collection of django custom management commands for use with ChEMBL and some classes for use in future',
     url='https://www.ebi.ac.uk/chembldb/index.php/ws',
-    license='CC BY-SA 3.0',
+    license='Apache Software License',
     packages=['chembl_extras',
               'chembl_extras.management',
               'chembl_extras.management.commands'],
@@ -37,7 +32,7 @@ setup(
                  'Environment :: Web Environment',
                  'Framework :: Django',
                  'Intended Audience :: Developers',
-                 'License :: Creative Commons :: Attribution-ShareAlike 3.0 Unported',
+                 'License :: OSI Approved :: Apache Software License',
                  'Operating System :: POSIX :: Linux',
                  'Programming Language :: Python :: 2.7',
                  'Topic :: Scientific/Engineering :: Chemistry'],
