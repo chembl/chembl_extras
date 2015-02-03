@@ -12,7 +12,7 @@ except ImportError:
 
 setup(
     name='chembl_extras',
-    version='0.5.3',
+    version='0.6.0',
     author='Michal Nowotka',
     author_email='mnowotka@ebi.ac.uk',
     description='Python package providing extra collection of django custom management commands for use with ChEMBL and some classes for use in future',
@@ -28,7 +28,7 @@ setup(
         'clint>=0.3.3',
     ],
     include_package_data=False,
-    classifiers=['Development Status :: 1 - Planning',
+    classifiers=['Development Status :: 4 - Beta',
                  'Environment :: Web Environment',
                  'Framework :: Django',
                  'Intended Audience :: Developers',
