@@ -1,6 +1,14 @@
 chembl_extras
 ======
 
+.. image:: https://pypip.in/v/chembl_extras/badge.png
+    :target: https://crate.io/packages/chembl_extras/
+    :alt: Latest PyPI version
+
+.. image:: https://pypip.in/d/chembl_extras/badge.png
+    :target: https://crate.io/packages/chembl_extras/
+    :alt: Number of PyPI downloads
+
 This is chembl_extras package developed at Chembl group, EMBL-EBI, Cambridge, UK.
 
 This package provides two django custom migration commands:
