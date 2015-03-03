@@ -1,6 +1,3 @@
-.. image:: https://badge.waffle.io/chembl/chembl_extras.png?label=ready&title=Ready 
- :target: https://waffle.io/chembl/chembl_extras
- :alt: 'Stories in Ready'
 chembl_extras
 ======
 
@@ -11,6 +8,10 @@ chembl_extras
 .. image:: https://pypip.in/d/chembl_extras/badge.png
     :target: https://crate.io/packages/chembl_extras/
     :alt: Number of PyPI downloads
+    
+.. image:: https://badge.waffle.io/chembl/chembl_extras.png?label=ready&title=Ready 
+ :target: https://waffle.io/chembl/chembl_extras
+ :alt: 'Stories in Ready'    
 
 This is chembl_extras package developed at Chembl group, EMBL-EBI, Cambridge, UK.
 
