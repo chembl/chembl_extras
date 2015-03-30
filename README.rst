@@ -1,13 +1,25 @@
 chembl_extras
 ======
 
-.. image:: https://pypip.in/v/chembl_extras/badge.png
-    :target: https://crate.io/packages/chembl_extras/
-    :alt: Latest PyPI version
+.. image:: https://pypip.in/version/chembl_extras/badge.svg
+    :target: https://pypi.python.org/pypi/chembl_extras/
+    :alt: Latest Version
 
-.. image:: https://pypip.in/d/chembl_extras/badge.png
-    :target: https://crate.io/packages/chembl_extras/
-    :alt: Number of PyPI downloads
+.. image:: https://pypip.in/download/chembl_extras/badge.svg
+    :target: https://pypi.python.org/pypi/chembl_extras/
+    :alt: Downloads
+
+.. image:: https://pypip.in/py_versions/chembl_extras/badge.svg
+    :target: https://pypi.python.org/pypi/chembl_extras/
+    :alt: Supported Python versions
+
+.. image:: https://pypip.in/status/chembl_extras/badge.svg
+    :target: https://pypi.python.org/pypi/chembl_extras/
+    :alt: Development Status
+
+.. image:: https://pypip.in/license/chembl_extras/badge.svg
+    :target: https://pypi.python.org/pypi/chembl_extras/
+    :alt: License
     
 .. image:: https://badge.waffle.io/chembl/chembl_extras.png?label=ready&title=Ready 
  :target: https://waffle.io/chembl/chembl_extras
