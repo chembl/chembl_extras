@@ -1,23 +1,24 @@
 chembl_extras
 ======
 
-.. image:: https://pypip.in/version/chembl_extras/badge.svg
+
+.. image:: https://img.shields.io/pypi/v/chembl_extras.svg
     :target: https://pypi.python.org/pypi/chembl_extras/
     :alt: Latest Version
 
-.. image:: https://pypip.in/download/chembl_extras/badge.svg
+.. image:: https://img.shields.io/pypi/dm/chembl_extras.svg
     :target: https://pypi.python.org/pypi/chembl_extras/
     :alt: Downloads
 
-.. image:: https://pypip.in/py_versions/chembl_extras/badge.svg
+.. image:: https://img.shields.io/pypi/pyversions/chembl_extras.svg
     :target: https://pypi.python.org/pypi/chembl_extras/
     :alt: Supported Python versions
 
-.. image:: https://pypip.in/status/chembl_extras/badge.svg
+.. image:: https://img.shields.io/pypi/status/chembl_extras.svg
     :target: https://pypi.python.org/pypi/chembl_extras/
     :alt: Development Status
 
-.. image:: https://pypip.in/license/chembl_extras/badge.svg
+.. image:: https://img.shields.io/pypi/l/chembl_extras.svg
     :target: https://pypi.python.org/pypi/chembl_extras/
     :alt: License
     
