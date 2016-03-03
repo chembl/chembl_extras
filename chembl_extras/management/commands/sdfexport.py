@@ -12,11 +12,11 @@ import gzip
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('--chebi_id', default=True, dest='chebi_id',
+        make_option('--chebi_id', default=False, dest='chebi_id',
             help='Include chebi_id.'),
         make_option('--chembl_id', default=True, dest='chembl_id',
             help='Include chembl_id.'),
-        make_option('--downgraded', default=True, dest='downgraded',
+        make_option('--downgraded', default=False, dest='downgraded',
             help='Include downgraded compounds.'),
         make_option('--out', dest='out_file',
             default='chembl.sdf.gz', help='Output file'),
@@ -50,15 +50,15 @@ class Command(BaseCommand):
             filters['molecule__downgraded'] = False
 
         fields = ['molfile']
-        mol_template = '%s\n'
+        mol_template = '{molfile}\n'
 
+        fields.append('molecule__chembl__chembl_id')
         if chembl_id:
-            fields.append('molecule__chembl__chembl_id')
-            mol_template += '> <chembl_id>\n%s\n\n'
+            mol_template += '> <chembl_id>\n{molecule__chembl__chembl_id}\n\n'
 
         if chebi_id:
             fields.append('molecule__chebi_id')
-            mol_template += '> <chebi_id>\n%s\n\n'
+            mol_template += '> <chebi_id>\n{molecule__chebi_id}\n\n'
 
         mol_template += '$$$$\n'
 
@@ -66,7 +66,7 @@ class Command(BaseCommand):
         n_structures = structures.count()
 
         if verbosity > 1:
-            print "Found %s structures to export" % n_structures
+            print "Found {0} structures to export".format(n_structures)
 
         if not n_structures:
             print "Nothing to export..."
@@ -74,9 +74,10 @@ class Command(BaseCommand):
         else:
             f = gzip.open(filename, 'wb')
             try:
-                for raw in progress.bar(structures.values_list(*fields).iterator(),
+                for raw in progress.bar(structures.values(*fields).iterator(),
                             label="exporting... ", expected_size=n_structures):
-                    f.write(mol_template % raw)
+                    mol = raw['molecule__chembl__chembl_id'] + mol_template.format(**raw)
+                    f.write(mol)
 
             finally:
                 f.close()
