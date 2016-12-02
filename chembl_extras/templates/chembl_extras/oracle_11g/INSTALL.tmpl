@@ -1,0 +1,67 @@
+***************************************************************************
+*
+* Name:         INSTALL
+*
+* Purpose:      To describe how to import ChEMBL data into an
+*               Oracle database.
+*
+* Date:         {{ release_date|date:"d/m/Y" }}
+*
+* Contact:      {{ contact }}
+*
+***************************************************************************
+*
+* DB Version    {{ release_version }}
+* Oracle        9i/10g/11g
+*
+***************************************************************************
+
+1. Connect to the database in SQL*Plus using an Oracle Net connection string
+   (i.e. <username>/<password>@<DATABASE_SERVICE>) as a user with DBA
+   privileges or request that your DBA performs steps 2 onwards for you.
+
+2. Edit the file pre_imp.sql with the username (schema name) you are installing
+   chembl into
+
+    e.g. edit the line
+    DEFINE p_username={{ release_version }}
+
+    to
+    DEFINE p_username=YOUR_SCHEMA_NAME
+
+3. From the working directory run the supplied 'pre_imp.sql' script.
+
+    SQL> @pre_imp
+
+   Answer the prompts for the following:
+
+      - The DATABASE_SERVICE (TNS) name in which you wish to install the
+        chembl data
+      - The chembl data owner user password
+      - The chembl data owner default tablespace
+        (If you have not already created a tablespace specifically for
+         chembl you should create one with at least 25GB of space)
+
+   The 'pre_imp.sql' script performs the following actions:
+
+    - Creates the chembl database user account (the data owner) you
+      defined in step 2 above
+    - Creates empty tables to hold row data
+
+4. Verify there are no errors by checking the screen output and inspecting the
+   'pre_imp.log' log file.
+
+5. Once again ensure you are in the working directory and import the data into
+   the database:
+
+    $> imp userid=YOUR_SCHEMA_NAME@<DATABASE_SERVICE> parfile=imp.par fromuser={{ release_version }} touser=YOUR_SCHEMA_NAME
+
+   Provide the user password used in the previous step in response to the prompt.
+
+   fromuser and touser arguments are only required when importing into a schema
+   named something other than {{ release_version }}.
+
+6. Verify the import has completed successfully by checking the screen output
+   and the output log written to {{ release_version }}.import.log file.
+
+

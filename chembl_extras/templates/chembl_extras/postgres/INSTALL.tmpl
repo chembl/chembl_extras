@@ -1,0 +1,34 @@
+***************************************************************************
+*
+* Name:         INSTALL
+*
+* Purpose:      To describe how to import ChEMBL data into an
+*               PostgreSQL database.
+*
+* Date:         {{ release_date|date:"d/m/Y" }}
+*
+* Contact:      {{ contact }}
+*
+***************************************************************************
+*
+* DB Version    {{ release_version }}
+* PostgreSQL    {{ postgres_ver }}
+*
+***************************************************************************
+
+Instructions
+------------
+
+1. Log into PostgreSQL database server where you intend to load chembl data
+   and run the following command to create new database:
+
+    pgdb=# create database {{ release_version }};
+
+2. Logout of database and run the following command to load data. You will
+   need to replace USERNAME, PASSWORD, HOST and PORT with local settings.
+   Depending on your database setup you may not need the host and port
+   arguments.
+
+    $> psql --host=HOST --port=PORT --username=USERNAME --password=PASSWORD {{ release_version }} < {{ release_version }}.pgdump.sql
+
+

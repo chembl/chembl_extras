@@ -1,0 +1,4 @@
+.output {{ release_version }}_chemreps.txt
+.mode tabs
+.headers on
+select molecule_dictionary.chembl_id, compound_structures.canonical_smiles, compound_structures.standard_inchi, compound_structures.standard_inchi_key from molecule_dictionary join compound_structures on molecule_dictionary.molregno = compound_structures.molregno;
