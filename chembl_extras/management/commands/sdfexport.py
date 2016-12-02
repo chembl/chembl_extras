@@ -76,6 +76,8 @@ class Command(BaseCommand):
             try:
                 for raw in progress.bar(structures.values(*fields).iterator(),
                             label="exporting... ", expected_size=n_structures):
+                    if raw['molfile'] and isinstance(raw['molfile'], basestring):
+                        raw['molfile'] = raw['molfile'].rstrip()
                     mol = raw['molecule__chembl__chembl_id'] + mol_template.format(**raw)
                     f.write(mol)
 
