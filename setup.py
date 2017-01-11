@@ -11,8 +11,8 @@ except ImportError:
     from setuptools import setup
 
 setup(
-    name='chembl_extras',
-    version='0.8.1',
+    name='chembl-extras',
+    version='0.8.3',
     author='Michal Nowotka',
     author_email='mnowotka@ebi.ac.uk',
     description='Python package providing extra collection of django custom management commands for use with ChEMBL and some classes for use in future',
@@ -23,7 +23,7 @@ setup(
               'chembl_extras.management.commands'],
     long_description=open('README.rst').read(),
     install_requires=[
-        'chembl_business_model',
+        'chembl-business-model',
         'biopython',
         'clint>=0.3.3',
     ],
