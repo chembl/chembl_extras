@@ -8,14 +8,17 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import NoArgsCommand
 from django.core.management.color import no_style
-from django.core.management.sql import emit_post_sync_signal
+from django.core.management.sql import emit_post_migrate_signal
 from django.db import connections, router, transaction, models, DEFAULT_DB_ALIAS
-from django.utils.datastructures import SortedDict
-from django.utils.importlib import import_module
+from collections import OrderedDict
+from importlib import import_module
+from django.apps import apps
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 def custom_sql_for_model(model, style, connection):
     opts = model._meta
-    app_dir = os.path.normpath(os.path.join(os.path.dirname(models.get_app(model._meta.app_label).__file__), 'sql'))
+    app_dir = os.path.normpath(os.path.join(os.path.dirname(apps.get_app(model._meta.app_label).__file__), 'sql'))
     output = []
 
     # Post-creation SQL should come before any initial SQL data is loaded.
@@ -46,17 +49,25 @@ def custom_sql_for_model(model, style, connection):
 
     return output
 
+# ----------------------------------------------------------------------------------------------------------------------
+
+
 class Command(NoArgsCommand):
-    option_list = NoArgsCommand.option_list + (
-        make_option('--noinput', action='store_false', dest='interactive', default=True,
-            help='Tells Django to NOT prompt the user for input of any kind.'),
-        make_option('--no-initial-data', action='store_false', dest='load_initial_data', default=True,
-            help='Tells Django not to load any initial data after database synchronization.'),
-        make_option('--database', action='store', dest='database',
-            default=DEFAULT_DB_ALIAS, help='Nominates a database to synchronize. '
-                'Defaults to the "default" database.'),
-    )
+
     help = "Create the database tables for all apps in INSTALLED_APPS whose tables haven't already been created."
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+    def add_arguments(self, parser):
+        parser.add_argument('--noinput', action='store_false', dest='interactive', default=True,
+                            help='Tells Django to NOT prompt the user for input of any kind.')
+        parser.add_argument('--no-initial-data', action='store_false', dest='load_initial_data', default=True,
+                            help='Tells Django not to load any initial data after database synchronization.')
+        parser.add_argument('--database', action='store', dest='database',
+                            default=DEFAULT_DB_ALIAS,
+                            help='Nominates a database to synchronize. Defaults to the "default" database.')
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle_noargs(self, **options):
 
@@ -85,7 +96,7 @@ class Command(NoArgsCommand):
                 msg = exc.args[0]
                 if not msg.startswith('No module named') or 'management' not in msg:
                     raise
-
+        transaction.set_autocommit(False)
         db = options.get('database')
         connection = connections[db]
         cursor = connection.cursor()
@@ -99,18 +110,18 @@ class Command(NoArgsCommand):
         # Build the manifest of apps and models that are to be synchronized
         all_models = [
             (app.__name__.split('.')[-2],
-                [m for m in models.get_models(app, include_auto_created=True)
+                [m for m in apps.get_models(app, include_auto_created=True)
                 if router.allow_syncdb(db, m)])
-            for app in models.get_apps()
+            for app in apps.get_apps()
         ]
 
         def model_installed(model):
             opts = model._meta
             converter = connection.introspection.table_name_converter
-            return not ((converter(opts.db_table) in tables) or
-                (opts.auto_created and converter(opts.auto_created._meta.db_table) in tables))
+            return not ((converter(opts.db_table) in tables)
+                        or (opts.auto_created and converter(opts.auto_created._meta.db_table) in tables))
 
-        manifest = SortedDict(
+        manifest = OrderedDict(
             (app_name, list(filter(model_installed, model_list)))
             for app_name, model_list in all_models
         )
@@ -137,11 +148,11 @@ class Command(NoArgsCommand):
                     cursor.execute(statement)
                 tables.append(connection.introspection.table_name_converter(model._meta.db_table))
 
-        transaction.commit_unless_managed(using=db)
+        transaction.commit(using=db)
 
         # Send the post_syncdb signal, so individual apps can do whatever they need
         # to do at this point.
-        emit_post_sync_signal(created_models, verbosity, interactive, db)
+        emit_post_migrate_signal(verbosity, interactive, db)
 
         # The connection may have been closed by a syncdb handler.
         cursor = connection.cursor()
@@ -156,18 +167,19 @@ class Command(NoArgsCommand):
                     custom_sql = custom_sql_for_model(model, self.style, connection)
                     if custom_sql:
                         if verbosity >= 2:
-                            self.stdout.write("Installing custom SQL for %s.%s model\n" % (app_name, model._meta.object_name))
+                            self.stdout.write("Installing custom SQL for %s.%s model\n" %
+                                              (app_name, model._meta.object_name))
                         try:
                             for sql in custom_sql:
                                 cursor.execute(sql)
                         except Exception as e:
-                            self.stderr.write("Failed to install custom SQL for %s.%s model: %s\n" % \
-                                                (app_name, model._meta.object_name, e))
+                            self.stderr.write("Failed to install custom SQL for %s.%s model: %s\n" %
+                                              (app_name, model._meta.object_name, e))
                             if show_traceback:
                                 traceback.print_exc()
-                            transaction.rollback_unless_managed(using=db)
+                            transaction.rollback(using=db)
                         else:
-                            transaction.commit_unless_managed(using=db)
+                            transaction.commit(using=db)
                     else:
                         if verbosity >= 3:
                             self.stdout.write("No custom SQL for %s.%s model\n" % (app_name, model._meta.object_name))
@@ -181,18 +193,21 @@ class Command(NoArgsCommand):
                     index_sql = connection.creation.sql_indexes_for_model(model, self.style)
                     if index_sql:
                         if verbosity >= 2:
-                            self.stdout.write("Installing index for %s.%s model\n" % (app_name, model._meta.object_name))
+                            self.stdout.write("Installing index for %s.%s model\n" %
+                                              (app_name, model._meta.object_name))
                         try:
                             for sql in index_sql:
                                 cursor.execute(sql)
                         except Exception as e:
-                            self.stderr.write("Failed to install index for %s.%s model: %s\n" % \
-                                                (app_name, model._meta.object_name, e))
-                            transaction.rollback_unless_managed(using=db)
+                            self.stderr.write("Failed to install index for %s.%s model: %s\n" %
+                                              (app_name, model._meta.object_name, e))
+                            transaction.rollback(using=db)
                         else:
-                            transaction.commit_unless_managed(using=db)
+                            transaction.commit(using=db)
 
         # Load initial_data fixtures (unless that has been disabled)
         if load_initial_data:
             call_command('loaddata', 'initial_data', verbosity=verbosity,
                          database=db, skip_validation=True)
+
+# ----------------------------------------------------------------------------------------------------------------------

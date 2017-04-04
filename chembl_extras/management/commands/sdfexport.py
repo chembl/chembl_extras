@@ -8,25 +8,24 @@ from django.conf import settings
 from django.db import DEFAULT_DB_ALIAS
 import gzip
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('--chebi_id', default=False, dest='chebi_id',
-            help='Include chebi_id.'),
-        make_option('--chembl_id', default=True, dest='chembl_id',
-            help='Include chembl_id.'),
-        make_option('--downgraded', default=False, dest='downgraded',
-            help='Include downgraded compounds.'),
-        make_option('--out', dest='out_file',
-            default='chembl.sdf.gz', help='Output file'),
-        make_option('--database', dest='db',
-            default=DEFAULT_DB_ALIAS, help='database')
-        )
-    help = ("Export all molecules from ChEMBL to one compressed *.sdf file.")
+
+    help = "Export all molecules from ChEMBL to one compressed *.sdf file."
     args = '[--chebi_id, --chembl_id, --downgraded, --out]'
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+    def add_arguments(self, parser):
+        parser.add_argument('--chebi_id', default=False, dest='chebi_id', help='Include chebi_id.')
+        parser.add_argument('--chembl_id', default=True, dest='chembl_id', help='Include chembl_id.')
+        parser.add_argument('--downgraded', default=False, dest='downgraded', help='Include downgraded compounds.')
+        parser.add_argument('--out', dest='out_file', default='chembl.sdf.gz', help='Output file')
+        parser.add_argument('--database', dest='db', default=DEFAULT_DB_ALIAS, help='database')
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle(self, *args, **options):
 
@@ -87,4 +86,4 @@ class Command(BaseCommand):
         if verbosity > 1:
             print "Exporting done."
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------

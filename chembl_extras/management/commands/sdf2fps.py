@@ -10,25 +10,24 @@ from rdkit.Chem import MACCSkeys
 from rdkit.Chem import rdMolDescriptors
 from rdkit import rdBase
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('--in', dest='in_file',
-            help='Input file'),
-        make_option('--out', dest='out_file',
-            default='out.fps.gz', help='Output file'),
-        make_option('--fp_type', dest='fp_type',
-            default='morgan', help='Type of fingerprint'),
-        make_option('--n_bits', dest='n_bits',
-            default=2048, help='Fingerprint length in bits'),
-        make_option('--radius', dest='radius',
-            default=2, help='Radius for the Morgan algorithm'),
-        )
-    help = ("Convert SDF to fps")
+
+    help = "Convert SDF to fps"
     args = '[--in, --out, --n_bits]'
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+    def add_arguments(self, parser):
+        parser.add_argument('--in', dest='in_file', help='Input file')
+        parser.add_argument('--out', dest='out_file', default='out.fps.gz', help='Output file')
+        parser.add_argument('--fp_type', dest='fp_type', default='morgan', help='Type of fingerprint')
+        parser.add_argument('--n_bits', dest='n_bits', default=2048, help='Fingerprint length in bits')
+        parser.add_argument('--radius', dest='radius', default=2, help='Radius for the Morgan algorithm')
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def getFileHandle(self, path, mode):
         import os
@@ -43,7 +42,7 @@ class Command(BaseCommand):
             f = open(path, mode)
         return f
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle(self, *args, **options):
 
@@ -84,4 +83,4 @@ class Command(BaseCommand):
         if verbosity > 1:
             print "Conversion completed."
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------

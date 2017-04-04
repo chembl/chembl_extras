@@ -16,7 +16,7 @@ init()
 
 LINE = '#' + '-' * 119
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 INDEX_PREFIX_NAME = 'MOLIDX_CMPDMO%'
 
@@ -64,25 +64,27 @@ where molregno=%s"""
 
 COUNT_MOLECULES_SQL = "SELECT COUNT(*) FROM COMPOUND_MOLS"
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Command(BaseCommand):
     help = "This script removes all cartridge related objects, activates new Biovia Direct cartridge and recreates " \
            "necessary objects and indexes."
-
-    option_list = BaseCommand.option_list + (
-        make_option('--source', action='store', dest='source',
-            default=DEFAULT_DB_ALIAS, help='connection details for reading the database'),
-        make_option('--target', action='store', dest='target',
-            default=DEFAULT_DB_ALIAS + '_write', help='connection details for writing the database'),
-    )
 
     r_connection = None
     w_connection = None
     r_cursor = None
     w_cursor = None
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+    def add_arguments(self, parser):
+        parser.add_argument('--source', action='store', dest='source',
+                            default=DEFAULT_DB_ALIAS, help='connection details for reading the database')
+        parser.add_argument('--target', action='store', dest='target',
+                            default=DEFAULT_DB_ALIAS + '_write', help='connection details for writing the database')
+
+# -----------------------------------------------------------------------------------------------------------------------
 
     def handle(self, **options):
         if settings.DEBUG:
@@ -92,7 +94,7 @@ class Command(BaseCommand):
         django.db.reset_queries()
         self.handle_activation(options)
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle_activation(self, options):
 
@@ -101,9 +103,7 @@ class Command(BaseCommand):
         source = options.get('source')
         target = options.get('target')
 
-        transaction.commit_unless_managed(using=target)
-        transaction.enter_transaction_management(using=target)
-        transaction.managed(True, using=target)
+        transaction.set_autocommit(False)
 
         self.r_connection = connections[source]
         self.w_connection = connections[target]
@@ -180,16 +180,16 @@ class Command(BaseCommand):
 
         self.try_execute_sql(CREATE_INDEXES_SQL, [], 'Creating indexes... (This may take a while)')
 
-        transaction.leave_transaction_management(using=target)
-
         self.r_connection.close()
         self.w_connection.close()
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
-    def try_execute_sql(self, sql, params, desc, ignores = []):
+    def try_execute_sql(self, sql, params, desc, ignores=None):
         print LINE + '\n'
         print desc
+        if not ignores:
+            ignores = []
         try:
             self.r_cursor.execute(sql, params)
         except Exception as e:
@@ -200,11 +200,13 @@ class Command(BaseCommand):
             sys.exit()
         print (colored('Done.\n', 'green'))
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
-    def try_execute_proc(self, proc, params, desc, ignores = []):
+    def try_execute_proc(self, proc, params, desc, ignores=None):
         print LINE + '\n'
         print desc
+        if not ignores:
+            ignores = []
         try:
             self.r_cursor.callproc(proc, params)
         except Exception as e:
@@ -215,4 +217,4 @@ class Command(BaseCommand):
             sys.exit()
         print (colored('Done.\n', 'green'))
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------

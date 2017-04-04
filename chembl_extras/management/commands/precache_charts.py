@@ -16,7 +16,7 @@ from threading import Thread
 import httplib
 from Queue import Queue
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 term = Terminal()
 
@@ -28,36 +28,36 @@ PROXIES = getattr(settings, 'PROXIES', None)
 q = Queue(CONCURRENT_SIZE * 2)
 
 WIDGETS = {
-    'COMPOUND' : [
-	    "/chembl/widget/create/compound_activity_chart/compound/activity/",
-	    "/chembl/widget/create/compound_activity_chart/compound/assay/",
-	    "/chembl/widget/create/compound_activity_chart/compound/target/",
-	],
+    'COMPOUND': [
+        "/chembl/widget/create/compound_activity_chart/compound/activity/",
+        "/chembl/widget/create/compound_activity_chart/compound/assay/",
+        "/chembl/widget/create/compound_activity_chart/compound/target/",
+    ],
     'TARGET': [
-	    "/chembl/widget/create/target_activity_chart/target/activity/",
+        "/chembl/widget/create/target_activity_chart/target/activity/",
         "/chembl/widget/create/target_assay_chart/target/assay/",
         "/chembl/widget/create/target_compoundmw_chart/target/compound_mw/",
         "/chembl/widget/create/target_compoundalogp_chart/target/compound_alogp/",
         "/chembl/widget/create/target_compoundpsa_chart/target/compound_psa/",
         "/chembl/widget/create/target_ligeff_chart/target/lig_eff/"
-	],
+    ],
     'ASSAY': [
-	    "/chembl/widget/create/target_activity_chart/target/activity/",
+        "/chembl/widget/create/target_activity_chart/target/activity/",
         "/chembl/widget/create/target_assay_chart/target/assay/",
         "/chembl/widget/create/target_compoundmw_chart/target/compound_mw/",
         "/chembl/widget/create/target_compoundalogp_chart/target/compound_alogp/",
         "/chembl/widget/create/target_compoundpsa_chart/target/compound_psa/",
         "/chembl/widget/create/target_ligeff_chart/target/lig_eff/"
-	],
-    'DOCUMENT':[
-	    "/chembl/widget/create/assay_activity_chart/assay/activity/",
+    ],
+    'DOCUMENT': [
+        "/chembl/widget/create/assay_activity_chart/assay/activity/",
         "/chembl/widget/create/assay_compoundmw_chart/assay/compound_mw/",
         "/chembl/widget/create/assay_compoundalogp_chart/assay/compound_alogp/",
         "/chembl/widget/create/assay_compoundpsa_chart/assay/compound_psa/",
         "/chembl/widget/create/assay_target_chart/assay/target/",
-	]}
+    ]}
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 def doWork():
     while True:
@@ -74,7 +74,7 @@ def doWork():
             print('url {0} returned status {1}'.format(url, status))
         q.task_done()
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 def getStatus(ourl):
     try:
@@ -86,7 +86,8 @@ def getStatus(ourl):
     except:
         return "error", ourl
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Writer(object):
     """Create an object with a write method that writes to a
@@ -104,18 +105,21 @@ class Writer(object):
         with term.location(*self.location):
             print(string)
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('--database', dest='db',
-            default=DEFAULT_DB_ALIAS, help='database'),
-        )
 
     help = "Generate cache for ChEMBL web UI widgets."
     args = '[--database]'
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+    def add_arguments(self, parser):
+        parser.add_argument('--database', dest='db',
+            default=DEFAULT_DB_ALIAS, help='database')
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle(self, *args, **options):
         self.db = options.get('db')
@@ -150,7 +154,8 @@ class Command(BaseCommand):
             except Exception as e:
                 print e.message
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 
 

@@ -12,23 +12,15 @@ try:
 except ImportError:
     import pickle
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('--eps', default=0.3, dest='eps',
-            help='Specifies the output serialization format for migration.'),
-        make_option('--min_points', dest='min_points',
-            default=100, help='Target database'),
-        make_option('--out', dest='out_file',
-            default='clusters.pkl.gz', help='Output file'),
-        make_option('--in', dest='input',
-            default=None, help='Input file'),
-        )
-    help = ("Cluster compounds in database.")
+
+    help = "Cluster compounds in database."
     args = '[--eps, --min_points, --out, --in]'
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     molecules = None
     infile = None
@@ -36,7 +28,16 @@ class Command(BaseCommand):
     UNCLASSIFIED = False
     NOISE = None
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+    def add_arguments(self, parser):
+        parser.add_argument('--eps', default=0.3, dest='eps',
+                            help='Specifies the output serialization format for migration.')
+        parser.add_argument('--min_points', dest='min_points', default=100, help='Target database')
+        parser.add_argument('--out', dest='out_file', default='clusters.pkl.gz', help='Output file')
+        parser.add_argument('--in', dest='input', default=None, help='Input file')
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def _region_query(self, mol_id, eps):
         n_retries = 0
@@ -58,7 +59,7 @@ class Command(BaseCommand):
                     raise e
                 pass
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     def _expand_cluster(self, pk, cluster_id, eps, min_points):
         seeds = self._region_query(pk, eps)
@@ -84,7 +85,7 @@ class Command(BaseCommand):
                 seeds = seeds[1:]
             return True
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     def dbscan(self, eps, min_points):
         print "DBSCAN started..."
@@ -96,21 +97,21 @@ class Command(BaseCommand):
                     cluster_id += 1
         print "DBSCAN finished!"
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     def save(self):
         f = gzip.open(self.filename, 'wb')
         pickle.dump(self.molecules, f)
         f.close()
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     def load(self):
         f = gzip.open(self.filename, 'rb')
         self.molecules = pickle.load(f)
         f.close()
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle(self, *args, **options):
         eps = options.get('eps')
@@ -122,7 +123,7 @@ class Command(BaseCommand):
             print "prefetching data..."
 
             self.molecules = dict([(mol[0], self.UNCLASSIFIED) for mol in
-                                    CompoundMols.objects.all().values_list('pk')])
+                                   CompoundMols.objects.all().values_list('pk')])
 
             self.save()
             print "done"
@@ -134,4 +135,4 @@ class Command(BaseCommand):
         finally:
             self.save()
 
-#------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------

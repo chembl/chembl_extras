@@ -60,16 +60,19 @@ SETTINGS = {
     ]
 }
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Command(BaseCommand):
+
     help = "This script generates a blast db out of chembl data"
 
-    option_list = BaseCommand.option_list+ (
-        make_option('--model', action='store', dest='mode', help='mode (can be "download" or "interface")'),
-    )
+# ----------------------------------------------------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------------------------------------------------
+    def add_arguments(self, parser):
+        parser.add_argument('--model', action='store', dest='mode', help='mode (can be "download" or "interface")')
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle(self, **options):
         if settings.DEBUG:
@@ -82,7 +85,7 @@ class Command(BaseCommand):
         for file in files:
             self.db_to_file(**file)
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
     def db_to_file(self, values, filename, model, filters, line_template):
         django.db.reset_queries()
@@ -103,22 +106,23 @@ class Command(BaseCommand):
             else:
                 file = open(filename, "w") if filename else sys.stdout
 
-        pbar = ProgressBar(widgets=['Writing %s: ' % filename , Percentage(), ' ', Bar(marker=RotatingMarker()), ' ', ETA()],
-            maxval=count,fd=open(os.devnull,"w") if not filename else sys.stderr).start()
+        pbar = ProgressBar(
+            widgets=['Writing %s: ' % filename, Percentage(), ' ', Bar(marker=RotatingMarker()), ' ', ETA()],
+            maxval=count,
+            fd=open(os.devnull, "w") if not filename else sys.stderr).start()
 
         counter = 0
 
         for res in qs:
             line = line_template % res
-            line = line.replace(' (None)','')
-            line = line.replace(' None','')
-            line = line.replace(' \n','\n')
+            line = line.replace(' (None)', '')
+            line = line.replace(' None', '')
+            line = line.replace(' \n', '\n')
             file.write(line)
             pbar.update(counter)
             counter += 1
         pbar.update(count)
         pbar.finish()
 
-#-----------------------------------------------------------------------------------------------------------------------
-
+# ----------------------------------------------------------------------------------------------------------------------
 

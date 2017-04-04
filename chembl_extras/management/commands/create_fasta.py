@@ -20,17 +20,18 @@ except ImportError:
     from chembl_core_model.models import TargetDictionary
 
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Command(BaseCommand):
     help = "This script generates a fasta file of chembl data"
 
-    option_list = BaseCommand.option_list+ (
-        make_option('--filename', action='store', dest='filename',
-            default=None, help='Output file'),
-    )
+# ----------------------------------------------------------------------------------------------------------------------
 
-#-----------------------------------------------------------------------------------------------------------------------
+    def add_arguments(self, parser):
+        parser.add_argument('--filename', action='store', dest='filename', default=None, help='Output file')
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle(self, **options):
         if settings.DEBUG:
@@ -38,8 +39,10 @@ class Command(BaseCommand):
             return
 
         django.db.reset_queries()
-        qs = TargetDictionary.objects.all().values_list('tid', 'pref_name', 'organism', 'targetcomponents__component__sequence',
-            'description', 'chembl_id', 'targetcomponents__component__accession').order_by('tid')
+        qs = TargetDictionary.objects.all().values_list('tid', 'pref_name', 'organism',
+                                                        'targetcomponents__component__sequence', 'description',
+                                                        'chembl_id',
+                                                        'targetcomponents__component__accession').order_by('tid')
         count = qs.count()
 
         filename = options.get('filename')
@@ -57,8 +60,10 @@ class Command(BaseCommand):
                 print (colored('Unrecognized file extension: %s' % file_extension, 'red'))
                 sys.exit()
 
-        pbar = ProgressBar(widgets=['CREATING BLAST DB: ', Percentage(), ' ', Bar(marker=RotatingMarker()), ' ', ETA()],
-                    maxval=count,fd=open(os.devnull,"w") if not filename else sys.stderr).start()
+        pbar = ProgressBar(
+            widgets=['CREATING BLAST DB: ', Percentage(), ' ', Bar(marker=RotatingMarker()), ' ', ETA()],
+            maxval=count,
+            fd=open(os.devnull, "w") if not filename else sys.stderr).start()
 
         counter = 0
 
@@ -72,4 +77,4 @@ class Command(BaseCommand):
         pbar.update(count)
         pbar.finish()
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------

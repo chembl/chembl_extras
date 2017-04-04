@@ -7,19 +7,15 @@ from django.db import DEFAULT_DB_ALIAS
 from django.conf import settings
 from django import db
 from django.db import connections
-from django.utils.datastructures import SortedDict
-from django.core.management.commands.dumpdata import sort_dependencies
+from collections import OrderedDict
+from django.core.serializers import sort_dependencies
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option('--database', dest='sourceDatabase', default=DEFAULT_DB_ALIAS, help='Source database'),
-        make_option('--dumpfile', dest='dumpfile', default=None, help='Location of dump file.'),
-        make_option('--datalimit', dest='dataLimit', default=10000, help='Data limit'),
-        make_option('--app', dest='app', default='chembl_migration_model', help='App to be exported'),
-        )
-    help = ("Prepare configuration file for ora2pg tool.")
+
+    help = "Prepare configuration file for ora2pg tool."
     args = '[appname appname.ModelName ...]'
 
     confTemplate = '''
@@ -71,16 +67,24 @@ ENABLE_MICROSECOND      0
 DISABLE_COMMENT         1
     '''
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+    def add_arguments(self, parser):
+        parser.add_argument('--database', dest='sourceDatabase', default=DEFAULT_DB_ALIAS, help='Source database')
+        parser.add_argument('--dumpfile', dest='dumpfile', default=None, help='Location of dump file.')
+        parser.add_argument('--datalimit', dest='dataLimit', default=10000, help='Data limit')
+        parser.add_argument('--app', dest='app', default='chembl_migration_model', help='App to be exported')
+
+# ----------------------------------------------------------------------------------------------------------------------
 
     def handle(self, *args, **options):
-        from django.db.models import get_app
+        from django.apps import apps
 
-        #TODO : Check export mode
+        # TODO : Check export mode
         db.reset_queries()
         sourceDatabase = options.get('sourceDatabase')
         dataLimit = options.get('dataLimit')
-        app = get_app(options.get('app'))
+        app = apps.get_app(options.get('app'))
 
         con = connections[sourceDatabase]
         if con.vendor != 'oracle':
@@ -93,12 +97,12 @@ DISABLE_COMMENT         1
         port = settings.DATABASES[sourceDatabase]['PORT']
         name = settings.DATABASES[sourceDatabase]['NAME']
 
-        app_list = SortedDict((app, None) for app in [app])
+        app_list = OrderedDict((app, None) for app in [app])
         tables = []
         sorted = sort_dependencies(app_list.items())
         lastObjectName = sorted[-1].__name__
         filename = lastObjectName + ".postgresql_psycopg2.sql"
-        chemblSQLPath  = os.path.join(os.path.dirname(app.__file__),'sql', filename)
+        chemblSQLPath = os.path.join(os.path.dirname(app.__file__),'sql', filename)
         location = chemblSQLPath
         oracleHome = os.environ['ORACLE_HOME']
 
@@ -107,7 +111,6 @@ DISABLE_COMMENT         1
                 location = os.path.join(options.get('dumpfile'), filename)
             else:
                 location = options.get('dumpfile')
-
 
         for model in reversed(sorted):
             if not model._meta.managed:
@@ -122,5 +125,4 @@ DISABLE_COMMENT         1
             f.close()
             os.symlink(location, chemblSQLPath)
 
-
-#-----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
