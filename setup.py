@@ -12,7 +12,7 @@ except ImportError:
 
 setup(
     name='chembl-extras',
-    version='0.9.6',
+    version='0.9.7',
     author='Michal Nowotka',
     author_email='mnowotka@ebi.ac.uk',
     description='Python package providing extra collection of django custom management commands for use with ChEMBL and some classes for use in future',
